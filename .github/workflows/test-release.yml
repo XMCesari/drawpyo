@@ -69,3 +69,24 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
+  draft-github-release:
+    name: Draft GitHub Release
+    needs: publish-to-testpypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Create a draft release for a new version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(python3 -c "import re; print(re.search(r'__version__ = \"(.+?)\"', open('src/drawpyo/__init__.py').read()).group(1))")
+          if gh release view "$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $version already exists; leaving it alone."
+          else
+            gh release create "$version" --repo "$GITHUB_REPOSITORY" \
+              --draft --target "$GITHUB_SHA" --title "$version" --generate-notes
+          fi
