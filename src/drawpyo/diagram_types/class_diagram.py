@@ -11,7 +11,6 @@ from ..diagram.edges import Edge
 from ..diagram.text_format import TextFormat
 from .tree import NodeObject, TreeDiagram, TreeGroup
 
-
 _PYTHON_BOOKKEEPING_NAMES = {
     "__annotate_func__",
     "__annotations__",

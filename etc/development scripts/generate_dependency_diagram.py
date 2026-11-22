@@ -2,7 +2,6 @@ from pathlib import Path
 
 from drawpyo.diagram_types import DependencyDiagram
 
-
 repository_root = Path(__file__).resolve().parents[2]
 output_path = repository_root / "etc" / "reference drawio charts"
 

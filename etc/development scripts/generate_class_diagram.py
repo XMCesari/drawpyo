@@ -3,7 +3,6 @@ from pathlib import Path
 import drawpyo
 from drawpyo.diagram_types import ClassDiagram
 
-
 output_path = Path(__file__).resolve().parents[1] / "reference drawio charts"
 
 diagram = ClassDiagram.create_from_module(

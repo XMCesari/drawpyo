@@ -20,7 +20,6 @@ from ..file import File
 from ..page import Page
 from .legend import Legend
 
-
 PathInput = Union[str, os.PathLike[str]]
 
 
@@ -211,9 +210,7 @@ class _RouteOccupancy:
         else:
             top, bottom = sorted((first[1], second[1]))
             for other_top, other_bottom in self.vertical.get(first[0], ()):
-                overlap = max(
-                    0.0, min(bottom, other_bottom) - max(top, other_top)
-                )
+                overlap = max(0.0, min(bottom, other_bottom) - max(top, other_top))
                 if overlap:
                     penalty += _OVERLAP_PENALTY + overlap * 4
             for y, ranges in self.horizontal.items():
@@ -1283,16 +1280,12 @@ class DependencyDiagram:
     ) -> None:
         """Reduce crossings with deterministic forward/backward barycentric sweeps."""
         layer_for = {
-            key: layer_index
-            for layer_index, keys in layers.items()
-            for key in keys
+            key: layer_index for layer_index, keys in layers.items() for key in keys
         }
 
         def positions() -> Dict[str, int]:
             return {
-                key: index
-                for keys in layers.values()
-                for index, key in enumerate(keys)
+                key: index for keys in layers.values() for index, key in enumerate(keys)
             }
 
         def reorder(
@@ -1364,9 +1357,7 @@ class DependencyDiagram:
             def endpoint_key(endpoint: Tuple[int, str]) -> Tuple[float, str, str]:
                 index, role = endpoint
                 dependency = rendered_edges[index][0]
-                other_id = (
-                    dependency.target if role == "source" else dependency.source
-                )
+                other_id = dependency.target if role == "source" else dependency.source
                 other = rectangles[other_id]
                 other_center = (
                     (other.top + other.bottom) / 2
@@ -1388,8 +1379,7 @@ class DependencyDiagram:
             ),
         )
         obstacles = [
-            rectangle.expanded(_ROUTING_CLEARANCE)
-            for rectangle in rectangles.values()
+            rectangle.expanded(_ROUTING_CLEARANCE) for rectangle in rectangles.values()
         ]
         occupied_paths: List[List[_Point]] = []
         occupancy = _RouteOccupancy()
@@ -1414,8 +1404,7 @@ class DependencyDiagram:
             for point in path[1:-1]:
                 edge.add_point_pos(point)  # type: ignore[arg-type]
             if any(
-                self._paths_cross(path, prior_path)
-                for prior_path in occupied_paths
+                self._paths_cross(path, prior_path) for prior_path in occupied_paths
             ):
                 edge.jumpStyle = "arc"
                 edge.jumpSize = 6
@@ -1432,9 +1421,13 @@ class DependencyDiagram:
         self, source: _Rectangle, target: _Rectangle
     ) -> Tuple[str, str]:
         if source == target:
-            return ("right", "bottom") if self.direction == "right" else (
-                "bottom",
-                "right",
+            return (
+                ("right", "bottom")
+                if self.direction == "right"
+                else (
+                    "bottom",
+                    "right",
+                )
             )
         source_center = (
             (source.left + source.right) / 2,
@@ -1479,9 +1472,7 @@ class DependencyDiagram:
         )
 
     @staticmethod
-    def _set_edge_port(
-        edge: Edge, face: str, fraction: float, *, source: bool
-    ) -> None:
+    def _set_edge_port(edge: Edge, face: str, fraction: float, *, source: bool) -> None:
         coordinates = {
             "left": (0.0, fraction),
             "right": (1.0, fraction),
@@ -1501,10 +1492,7 @@ class DependencyDiagram:
         target = rectangles[dependency.target]
         distance = abs(
             (source.left + source.right) / 2 - (target.left + target.right) / 2
-        ) + abs(
-            (source.top + source.bottom) / 2
-            - (target.top + target.bottom) / 2
-        )
+        ) + abs((source.top + source.bottom) / 2 - (target.top + target.bottom) / 2)
         return -distance, dependency.source, dependency.target
 
     @classmethod
@@ -1533,9 +1521,7 @@ class DependencyDiagram:
         if start not in valid_points or end not in valid_points:
             raise RuntimeError("Unable to place a dependency edge outside node bounds")
 
-        neighbors: Dict[_Point, List[_Point]] = {
-            point: [] for point in valid_points
-        }
+        neighbors: Dict[_Point, List[_Point]] = {point: [] for point in valid_points}
         by_y: Dict[float, List[float]] = {}
         by_x: Dict[float, List[float]] = {}
         for x, y in valid_points:
@@ -1576,19 +1562,14 @@ class DependencyDiagram:
                 bend = _BEND_PENALTY if incoming and incoming != direction else 0
                 route_penalty = occupancy.penalty(point, neighbor)
                 next_cost = (
-                    cost
-                    + cls._manhattan(point, neighbor)
-                    + bend
-                    + route_penalty
+                    cost + cls._manhattan(point, neighbor) + bend + route_penalty
                 )
                 next_state = (neighbor, direction)
                 if next_cost < costs.get(next_state, math.inf):
                     costs[next_state] = next_cost
                     previous[next_state] = state
                     estimate = next_cost + cls._manhattan(neighbor, end)
-                    heapq.heappush(
-                        pending, (estimate, next_cost, neighbor, direction)
-                    )
+                    heapq.heappush(pending, (estimate, next_cost, neighbor, direction))
 
         if final_state is None:
             raise RuntimeError("Unable to route a dependency edge around node bounds")
@@ -1603,13 +1584,10 @@ class DependencyDiagram:
         return cls._simplify_path(route)
 
     @staticmethod
-    def _point_inside_obstacle(
-        point: _Point, obstacles: Sequence[_Rectangle]
-    ) -> bool:
+    def _point_inside_obstacle(point: _Point, obstacles: Sequence[_Rectangle]) -> bool:
         x, y = point
         return any(
-            obstacle.left < x < obstacle.right
-            and obstacle.top < y < obstacle.bottom
+            obstacle.left < x < obstacle.right and obstacle.top < y < obstacle.bottom
             for obstacle in obstacles
         )
 
@@ -1653,9 +1631,7 @@ class DependencyDiagram:
         horizontal_min, horizontal_max = sorted(
             (horizontal_first[0], horizontal_second[0])
         )
-        vertical_min, vertical_max = sorted(
-            (vertical_first[1], vertical_second[1])
-        )
+        vertical_min, vertical_max = sorted((vertical_first[1], vertical_second[1]))
         return (
             horizontal_min < vertical_first[0] < horizontal_max
             and vertical_min < horizontal_first[1] < vertical_max
@@ -1733,11 +1709,7 @@ class DependencyDiagram:
             return
         maximum_x = max(obj.position[0] + obj.width for obj in self.objects)
         maximum_y = max(obj.position[1] + obj.height for obj in self.objects)
-        route_points = [
-            point
-            for edge in self.links
-            for point in edge.geometry.points
-        ]
+        route_points = [point for edge in self.links for point in edge.geometry.points]
         if route_points:
             maximum_x = max(maximum_x, max(point.x for point in route_points))
             maximum_y = max(maximum_y, max(point.y for point in route_points))

@@ -515,14 +515,12 @@ def test_routes_avoid_unrelated_nodes_for_every_link_style(
         right, bottom = left + obj.width, top + obj.height
         if first[1] == second[1]:
             segment_left, segment_right = sorted((first[0], second[0]))
-            return (
-                top < first[1] < bottom
-                and max(segment_left, left) < min(segment_right, right)
+            return top < first[1] < bottom and max(segment_left, left) < min(
+                segment_right, right
             )
         segment_top, segment_bottom = sorted((first[1], second[1]))
-        return (
-            left < first[0] < right
-            and max(segment_top, top) < min(segment_bottom, bottom)
+        return left < first[0] < right and max(segment_top, top) < min(
+            segment_bottom, bottom
         )
 
     for dependency, path in zip(diagram.analysis.edges, diagram._routed_paths):
@@ -555,12 +553,8 @@ def test_obstacle_aware_routes_are_deterministic(tmp_path):
 
     assert first._routed_paths == second._routed_paths
     assert [
-        (edge.exitX, edge.exitY, edge.entryX, edge.entryY)
-        for edge in first.links
-    ] == [
-        (edge.exitX, edge.exitY, edge.entryX, edge.entryY)
-        for edge in second.links
-    ]
+        (edge.exitX, edge.exitY, edge.entryX, edge.entryY) for edge in first.links
+    ] == [(edge.exitX, edge.exitY, edge.entryX, edge.entryY) for edge in second.links]
     assert any(edge.jumpStyle == "arc" for edge in first.links)
 
 
