@@ -1,6 +1,6 @@
 # Tree Diagrams
 
-These very useful diagram types are why drawpyo was written initially! The TreeDiagram module allows the easy creation of heirarchical directed trees, managing the tree parent and children relationships, then providing a convenient auto layout function.
+These very useful diagram types are why drawpyo was written initially! The TreeDiagram module allows the easy creation of hierarchical directed trees, managing the tree parent and children relationships, then providing a convenient auto layout function.
 
 ## Create a Tree
 
