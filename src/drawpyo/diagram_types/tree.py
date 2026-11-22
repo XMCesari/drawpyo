@@ -66,7 +66,7 @@ class NodeObject(Object):
         """Add a new child to the object
 
         Args:
-            obj (NodeObject)
+            obj (NodeObject): The child object to add
         """
         self.tree_children.append(obj)
         obj._tree_parent = self
