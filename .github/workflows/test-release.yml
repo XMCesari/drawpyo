@@ -6,7 +6,7 @@ name: publish-to-testpypi
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   build:
