@@ -24,6 +24,8 @@ jobs:
           python-version: "3.x"
       - run: python3 -m pip install mkdocs-material mkdocstrings-python
       - run: mkdocs build --strict
+        env:
+          NO_MKDOCS_2_WARNING: "1"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/
