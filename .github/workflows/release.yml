@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Install pypa/build
+      - name: Install pypa/build and twine
         run: >-
           python3 -m
           pip install
@@ -32,6 +32,8 @@ jobs:
           --user
       - name: Build a binary wheel and a source tarball
         run: python3 -m build
+      - name: Check distribution metadata
+        run: python3 -m twine check --strict dist/*
       - name: Verify installed distribution and release version
         env:
           RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
