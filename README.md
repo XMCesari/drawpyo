@@ -8,9 +8,9 @@ Drawpyo is a Python library for programmatically generating Diagrams.net/Draw.io
 
 # History/Justification
 
-I love Draw.io! Compared to expensive and heavy commercial options like Visio and Miro, Draw.io's free and lightweight app allows wider and more universal distribution of diagrams. Because the files are stored in plaintext they can be versioned alongside code in a repository as documentation. The XML-based file format makes these diagrams semi-portable, and could easily be ported to other applications if Draw.io ever failed you. For these reason, I think it's one of the best options for documentation diagrams.
-
-When I had a need to generate heirarchical tree diagrams of requirement structures I was surprised to find there wasn't even a single existing Python library for working with these files. I took the project home and spent a weekend building the initial functionality. I've been adding functionality, robustness, and documentation intermittently since.
+We love Draw.io! Compared to expensive and heavy commercial options like Visio and Miro, Draw.io's free and lightweight app allows wider and more universal distribution of diagrams. Because the files are stored in plaintext they can be versioned alongside code in a repository as documentation. The XML-based file format makes these diagrams semi-portable, and could easily be ported to other applications if Draw.io ever failed you. For these reasons, we think it's one of the best options for documentation diagrams.
+ 
+Drawpyo started as a weekend project by Xander Cesari, who needed to generate hierarchical tree diagrams of requirement structures and was surprised to find there wasn't a single existing Python library for working with Draw.io files. Since then a growing group of [contributors](https://github.com/XMCesari/drawpyo/graphs/contributors) has added new diagram types, shape library support, and plenty of robustness and documentation improvements.
 
 # Full Documentation
 
