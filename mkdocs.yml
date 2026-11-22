@@ -14,7 +14,12 @@ theme:
 
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_options:
+              warn_unknown_params: false
 
 nav:
   - Home: index.md
