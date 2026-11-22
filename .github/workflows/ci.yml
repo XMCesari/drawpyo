@@ -29,3 +29,14 @@ jobs:
 
       - name: Run tests
         run: pytest --maxfail=1 --disable-warnings -q
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python3 -m pip install mkdocs-material mkdocstrings-python
+      - run: mkdocs build --strict
+        env:
+          NO_MKDOCS_2_WARNING: "1"
