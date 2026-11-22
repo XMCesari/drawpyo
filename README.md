@@ -15,7 +15,8 @@ When I had a need to generate heirarchical tree diagrams of requirement structur
 # Full Documentation
 
 Available here!
-https://xmcesari.github.io/drawpyo/
+
+https://drawpyo.com/
 
 # Basic Usage
 
@@ -94,7 +95,7 @@ This video demonstrates an exemplary automatic diagram layout process:
 [<img src="https://img.youtube.com/vi/HwUqUZZVMgQ/hqdefault.jpg" width="480" height="270"
 />](https://www.youtube.com/embed/HwUqUZZVMgQ)
 
-For more details, refer to the [documentation](https://xmcesari.github.io/drawpyo/).
+For more details, refer to the [documentation](https://drawpyo.com/).
 
 ## Import existing diagrams
 
