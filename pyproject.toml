@@ -19,7 +19,8 @@ dynamic = ["version"]
 dependencies = ["toml >= 0.10.2; python_version < '3.11'"]
 
 [project.urls]
-Homepage = "https://github.com/XMCesari/drawpyo"
+Homepage = "https://drawpyo.com/"
+Repository = "https://github.com/XMCesari/drawpyo"
 Issues = "https://github.com/XMCesari/drawpyo/issues"
 
 [project.optional-dependencies]
