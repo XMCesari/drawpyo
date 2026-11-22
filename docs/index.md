@@ -19,4 +19,4 @@ So when I had a need to generate hierarchical tree diagrams of requirement struc
 
 # The Future of Drawpyo
 
-We’re constantly working to add new functionality, address issues and feature requests. If you find Drawpyo useful and would like to contribute, we’d greatly appreciate your help! You can reach out directly at [xander@merriman.industries](mailto:xander@merriman.industries) or join the conversation through GitHub issues.
+We’re constantly working to add new functionality, address issues and feature requests. If you find Drawpyo useful and would like to contribute, we’d greatly appreciate your help! You can reach out directly at [xander@xmcesari.engineer](mailto:xander@xmcesari.engineer) or join the conversation through GitHub issues.
