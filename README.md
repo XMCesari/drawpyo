@@ -1,4 +1,4 @@
-![CI](https://github.com/MerrimanInd/drawpyo/actions/workflows/ci.yml/badge.svg) ![GitHub License](https://img.shields.io/github/license/MerrimanInd/drawpyo) ![PyPI Version](https://img.shields.io/pypi/v/drawpyo) ![PyPI Downloads](https://img.shields.io/pypi/dm/drawpyo)
+![CI](https://github.com/XMCesari/drawpyo/actions/workflows/ci.yml/badge.svg) ![GitHub License](https://img.shields.io/github/license/XMCesari/drawpyo) ![PyPI Version](https://img.shields.io/pypi/v/drawpyo) ![PyPI Downloads](https://img.shields.io/pypi/dm/drawpyo)
 
 <p align="left">
   <img src="docs/img/logo.png" alt="drawpyo logo"/>
@@ -15,8 +15,7 @@ When I had a need to generate heirarchical tree diagrams of requirement structur
 # Full Documentation
 
 Available here!
-
-https://merrimanind.github.io/drawpyo/
+https://xmcesari.github.io/drawpyo/
 
 # Basic Usage
 
@@ -95,7 +94,7 @@ This video demonstrates an exemplary automatic diagram layout process:
 [<img src="https://img.youtube.com/vi/HwUqUZZVMgQ/hqdefault.jpg" width="480" height="270"
 />](https://www.youtube.com/embed/HwUqUZZVMgQ)
 
-For more details, refer to the [documentation](https://merrimanind.github.io/drawpyo/).
+For more details, refer to the [documentation](https://xmcesari.github.io/drawpyo/).
 
 ## Import existing diagrams
 

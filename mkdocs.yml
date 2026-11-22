@@ -1,10 +1,10 @@
 site_name: Drawpyo
-site_url: https://merrimanind.github.io/drawpyo/
+site_url: https://xmcesari.github.io/drawpyo/
 site_author: Xander Cesari
 
 # Repository
-repo_name: MerrimanInd/drawpyo
-repo_url: https://github.com/MerrimanInd/drawpyo
+repo_name: XMCesari/drawpyo
+repo_url: https://github.com/XMCesari/drawpyo
 
 # theme: readthedocs
 theme:
@@ -14,21 +14,26 @@ theme:
 
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_options:
+              warn_unknown_params: false
 
 nav:
   - Home: index.md
   - About: about.md
   - Basic Diagrams:
-    - Usage: usage/basic_usage.md
-    - Formatting Text: usage/text_format.md
-    - Load Diagrams: usage/load_diagrams.md
-    - Color Management: usage/color_management.md
-    - Objects: usage/objects.md
-    - Parent and Child Objects: usage/parent_child_objects.md
-    - Extended Objects: usage/extended_objects.md
-    - Edges: usage/edges.md
-    - Shape Libraries: usage/shape_libs.md
+      - Usage: usage/basic_usage.md
+      - Formatting Text: usage/text_format.md
+      - Load Diagrams: usage/load_diagrams.md
+      - Color Management: usage/color_management.md
+      - Objects: usage/objects.md
+      - Parent and Child Objects: usage/parent_child_objects.md
+      - Extended Objects: usage/extended_objects.md
+      - Edges: usage/edges.md
+      - Shape Libraries: usage/shape_libs.md
   - Custom Diagram Types:
     - Tree Diagrams: diagram_types/tree_diagrams.md
     - Binary Tree Diagrams: diagram_types/binary_tree_diagrams.md

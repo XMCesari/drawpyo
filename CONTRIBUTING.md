@@ -4,7 +4,7 @@ Welcome to `drawpyo`! We're always interested in new contributors. This document
 
 ### Working with the Project
 
-Contributions can be made in one of two areas. `src/drawpyo` contains the core logic for generating any arbitrary Draw.io diagram. `src/drawpyo/diagram_types` contains subfunctions that use those core functions to automate the generation of common diagram types. A good first contribution is implementing a diagram_type before modifying the core functionality. Issues related to this are labeled with [the 'diagramType' tag](https://github.com/MerrimanInd/drawpyo/issues?q=is%3Aissue%20state%3Aopen%20label%3AdiagramType).
+Contributions can be made in one of two areas. `src/drawpyo` contains the core logic for generating any arbitrary Draw.io diagram. `src/drawpyo/diagram_types` contains subfunctions that use those core functions to automate the generation of common diagram types. A good first contribution is implementing a diagram_type before modifying the core functionality. Issues related to this are labeled with [the 'diagramType' tag](https://github.com/XMCesari/drawpyo/issues?q=is%3Aissue%20state%3Aopen%20label%3AdiagramType).
 
 We prioritize keeping the absolute minimum dependencies. Currently we only have one dependency and that's the `toml` library. TOML reading functionality was added to the standard library in Python 3.11 so once we end support for 3.10 and 3.11 is the MRV we'll hopefully go down to zero dependencies!
 
