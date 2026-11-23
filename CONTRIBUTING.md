@@ -38,6 +38,8 @@ Ensure there is an existing issue describing the bug, feature, or improvement. I
 
 **PR Requirements:**
 - Code builds successfully and all tests pass.
+- Code is formatted with Black (`uv run black .`). CI runs `black --check`.
+- The docs build cleanly in strict mode (`uv run mkdocs build --strict`). CI runs this on every PR.
 - New functionality includes appropriate tests.
 - Documentation is updated if behavior or usage has changed.
 - No unnecessary formatting or unrelated refactoring is included.
@@ -54,22 +56,8 @@ All builds and publishing to PyPI is handled by GitHub Actions through Trusted P
 
 #### Publishing
 
-Drawpyo has GitHub Actions set up to automatically publish any commit to the main branch to TestPyPI and publish any tagged commit in main to the production PyPI instance, with approval from a maintainer.
+Releases are published by GitHub Actions using PyPI Trusted Publishing, so no API tokens are stored anywhere.
 
-#### Manual Publishing
-
-For those with access to the PyPI repository and a valid API key, a manual upload to PyPI can be performed when there's a CD pipeline failure. `twine` handles the upload.
-
-First, test the upload on TestPyPI with the command:
-
-`uv run twine upload --repository testpypi dist/* -u "__token__" -p [TEST_API_TOKEN]"`
-
-Once that's done, upload to the main PyPI instance:
-
-`uv run twine upload --repository pypi dist/* -u "__token__" -p [API_TOKEN]"`
-
-Likewise, a manual docs build and upload can be performed using the `gh` CLI:
-
-`uv run mkdocs gh-deploy --force`
-
-Note that your GitHub user account needs to have the correct access to the repo for this, making copying a token into the command unnecessary.
+1. Open a PR that bumps `__version__` in `src/drawpyo/__init__.py`.
+2. When it merges into `main`, that version is uploaded to TestPyPI automatically. Merges that don't change the version skip the upload.
+3. A maintainer pushes a tag on the release commit that exactly matches `__version__` (e.g. `0.3.0`, no leading `v`). This publishes the docs and starts the PyPI release, which goes out after a maintainer approves the deployment.
