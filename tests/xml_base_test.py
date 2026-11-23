@@ -21,6 +21,8 @@ class TestXMLBaseInit:
         assert xml_base.xml_parent is None
         assert xml_base.tag is None
         assert xml_base.tooltip is None
+        assert xml_base.link is None
+        assert xml_base.link_target is None
 
     def test_custom_id(self) -> None:
         """Checks if an object with a user ID has been created"""
@@ -46,6 +48,23 @@ class TestXMLBaseInit:
         """Checks the creation of an object with a hint"""
         obj = drawpyo.XMLBase(tooltip="This is a tooltip")
         assert obj.tooltip == "This is a tooltip"
+
+    def test_with_link(self) -> None:
+        """Checks the creation of an object with a link"""
+        obj = drawpyo.XMLBase(link="https://example.com")
+        assert obj.link == "https://example.com"
+        assert obj.link_target == "_blank"
+
+    def test_add_link_helper(self) -> None:
+        """Checks the add_link helper method"""
+        obj = drawpyo.XMLBase()
+        obj.add_link("https://example.com")
+        assert obj.link == "https://example.com"
+        assert obj.link_target == "_blank"
+
+        obj.add_link("data:page/id,page-2", link_target=None)
+        assert obj.link == "data:page/id,page-2"
+        assert obj.link_target is None
 
 
 class TestXMLBaseAttributes:
@@ -85,7 +104,7 @@ class TestXMLBaseTags:
         assert 'id="test_id"' in obj.xml_open_tag
         assert 'parent="parent_id"' in obj.xml_open_tag
 
-    @pytest.mark.parametrize("wrapper_attribute", ["tag", "tooltip"])
+    @pytest.mark.parametrize("wrapper_attribute", ["tag", "tooltip", "link"])
     @pytest.mark.parametrize(
         "element_type", [drawpyo.diagram.Object, drawpyo.diagram.Edge]
     )
@@ -105,9 +124,24 @@ class TestXMLBaseTags:
         assert wrapper.tag == "UserObject"
         assert wrapper.get("label") == text
         assert wrapper.get("id") == text
-        xml_attribute = "tags" if wrapper_attribute == "tag" else "tooltip"
+        xml_attribute = "tags" if wrapper_attribute == "tag" else wrapper_attribute
         assert wrapper.get(xml_attribute) == text
-        assert wrapper.find("mxCell") is not None
+        if wrapper_attribute == "link":
+            assert wrapper.get("linkTarget") == "_blank"
+        cell = wrapper.find("mxCell")
+        assert cell is not None
+        assert cell.get("id") is None
+        assert cell.get("value") is None
+
+    def test_object_link_with_page_target_and_no_link_target(self) -> None:
+        obj = drawpyo.diagram.Object(value="Go to Page 2")
+        obj.add_link("data:page/id,page-2", link_target=None)
+
+        wrapper = ET.fromstring(obj.xml)
+        assert wrapper.tag == "UserObject"
+        assert wrapper.get("label") == "Go to Page 2"
+        assert wrapper.get("link") == "data:page/id,page-2"
+        assert wrapper.get("linkTarget") is None
 
 
 class TestXmlIfy:
