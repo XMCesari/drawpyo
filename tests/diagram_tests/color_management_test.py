@@ -1,5 +1,6 @@
 import pytest
 from drawpyo import ColorScheme, StandardColor
+from drawpyo.diagram import Object
 
 # ============================================================
 #  HEX VALIDATION
@@ -133,6 +134,19 @@ def test_none_values_allowed():
     assert scheme.fill_color is None
     assert scheme.stroke_color is None
     assert scheme.font_color is None
+
+
+def test_gradient_color_is_available_in_color_scheme():
+    scheme = ColorScheme(gradient_color="#abcdef")
+    assert scheme.gradient_color == "#ABCDEF"
+    scheme.set_gradient_color("#123456")
+    assert scheme.gradient_color == "#123456"
+
+
+def test_object_gradient_kwarg_serializes_drawio_gradient_color():
+    assert "gradientColor=#ABCDEF" in Object(gradient="#abcdef").style
+    scheme = ColorScheme(fill_color="#000000", gradient_color="#123456")
+    assert "gradientColor=#123456" in Object(color_scheme=scheme).style
 
 
 # ============================================================

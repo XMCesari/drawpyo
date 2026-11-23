@@ -118,6 +118,7 @@ class Object(DiagramBase):
             "whiteSpace",
             "rounded",
             "fillColor",
+            "gradientColor",
             "strokeColor",
             "glass",
             "shadow",
@@ -178,6 +179,14 @@ class Object(DiagramBase):
         self.fillColor: Optional[Union[str, StandardColor]] = kwargs.get(
             "fillColor"
         ) or (self.color_scheme.fill_color if self.color_scheme else None)
+        # Draw.io uses gradientColor as the end color; expose the shorter
+        # ``gradient`` kwarg while retaining the native style attribute.
+        gradient = kwargs.get("gradient", kwargs.get("gradientColor"))
+        self.gradientColor: Optional[Union[str, StandardColor]] = (
+            ColorScheme(gradient_color=gradient).gradient_color
+            if gradient is not None
+            else (self.color_scheme.gradient_color if self.color_scheme else None)
+        )
         self.glass: Optional[bool] = kwargs.get("glass", None)
         self.shadow: Optional[bool] = kwargs.get("shadow", None)
         self.comic: Optional[bool] = kwargs.get("comic", None)

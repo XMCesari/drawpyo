@@ -28,10 +28,12 @@ class ColorScheme:
         fill_color: ColorType = None,
         stroke_color: ColorType = None,
         font_color: ColorType = None,
+        gradient_color: ColorType = None,
     ) -> None:
         self.fill_color: ColorType = self._validated(fill_color)
         self.stroke_color: ColorType = self._validated(stroke_color)
         self.font_color: ColorType = self._validated(font_color)
+        self.gradient_color: ColorType = self._validated(gradient_color)
         logger.info(f"🎨 ColorScheme created: {self.__repr__()}")
 
     ###########################################################
@@ -46,6 +48,10 @@ class ColorScheme:
 
     def set_font_color(self, color: ColorType) -> None:
         self.font_color = self._validated(color)
+
+    def set_gradient_color(self, color: ColorType) -> None:
+        """Set the Draw.io gradient end color."""
+        self.gradient_color = self._validated(color)
 
     ###########################################################
     # Validation
@@ -85,5 +91,6 @@ class ColorScheme:
         return (
             f"fill: {self.fill_color} "
             f"| stroke: {self.stroke_color} "
-            f"| font: {self.font_color}"
+            f"| font: {self.font_color} "
+            f"| gradient: {self.gradient_color}"
         )
