@@ -129,6 +129,23 @@ def test_auto_layout_handles_loops_branches_and_disconnected_nodes(direction):
     ElementTree.fromstring(chart.file.xml)
 
 
+@pytest.mark.parametrize("direction", ["down", "right"])
+def test_reciprocal_edges_use_distinct_aligned_lanes(direction):
+    chart = FlowChart(direction=direction)
+    decision = Decision(flowchart=chart, value="Ready?")
+    process = Process(flowchart=chart, value="Prepare")
+    no_edge = decision.no(process)
+    return_edge = process.connect(decision)
+
+    chart.auto_layout()
+
+    assert no_edge.exitY == no_edge.entryY
+    assert return_edge.exitY == return_edge.entryY
+    assert no_edge.exitY != return_edge.exitY
+    assert no_edge.geometry.points == []
+    assert return_edge.geometry.points == []
+
+
 def test_auto_layout_is_repeatable_without_duplicating_links_or_waypoints():
     chart, *_ = _looping_chart()
 

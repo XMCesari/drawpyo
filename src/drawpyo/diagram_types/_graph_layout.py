@@ -357,7 +357,7 @@ def route_edges(
     for (node_id, face), endpoints in sorted(endpoint_groups.items()):
         rectangle = rectangles[node_id]
 
-        def endpoint_key(endpoint: Tuple[int, str]) -> Tuple[float, str, str]:
+        def endpoint_key(endpoint: Tuple[int, str]) -> Tuple[float, str, int]:
             index, role = endpoint
             source_id, target_id, _ = rendered_edges[index]
             other_id = target_id if role == "source" else source_id
@@ -367,7 +367,7 @@ def route_edges(
                 if face in {"left", "right"}
                 else (other.left + other.right) / 2
             )
-            return other_center, other_id, role
+            return other_center, other_id, index
 
         endpoints.sort(key=endpoint_key)
         for rank, endpoint in enumerate(endpoints, start=1):
