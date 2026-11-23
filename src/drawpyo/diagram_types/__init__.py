@@ -9,6 +9,7 @@ from .bar_chart import BarChart
 from .pie_chart import PieChart
 from .legend import Legend
 from .binary_tree import BinaryNodeObject, BinaryTreeDiagram
+from .flowchart import FlowChart, FlowChartNode, Start, Process, Decision, End
 
 __all__ = [
     NodeObject,
@@ -23,4 +24,10 @@ __all__ = [
     Legend,
     BinaryNodeObject,
     BinaryTreeDiagram,
+    FlowChart,
+    FlowChartNode,
+    Start,
+    Process,
+    Decision,
+    End,
 ]

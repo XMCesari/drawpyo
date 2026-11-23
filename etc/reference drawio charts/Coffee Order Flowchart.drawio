@@ -1,0 +1,46 @@
+<mxfile host="Drawpyo" modified="2026-11-23T15:10:07" agent="Python 3.10, Drawpyo 0.23" version="21.6.5" type="device">
+  <diagram name="Flowchart" id="139915417058560">
+    <mxGraphModel dx="2037" dy="830" grid="1" gridSize="10" guides="1" toolTips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="139915417056640" value="Order received" style="whiteSpace=wrap;rounded=0;dashed=0;strokeWidth=2;shape=mxgraph.flowchart.start_1;" vertex="1" parent="1">
+  <mxGeometry x="70" y="70" width="100" height="60" as="geometry" />
+</mxCell>
+        <mxCell id="139915406806752" value="Review order" style="whiteSpace=wrap;rounded=1;dashed=0;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+  <mxGeometry x="70" y="210" width="100" height="100" as="geometry" />
+</mxCell>
+        <mxCell id="139915406806896" value="Ingredients available?" style="whiteSpace=wrap;rounded=0;dashed=0;strokeWidth=2;shape=mxgraph.flowchart.decision;" vertex="1" parent="1">
+  <mxGeometry x="70" y="390" width="100" height="100" as="geometry" />
+</mxCell>
+        <mxCell id="139915406807040" value="Prepare drink" style="whiteSpace=wrap;rounded=1;dashed=0;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+  <mxGeometry x="70" y="570" width="100" height="100" as="geometry" />
+</mxCell>
+        <mxCell id="139915406807184" value="Suggest substitute" style="whiteSpace=wrap;rounded=1;dashed=0;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+  <mxGeometry x="198" y="390" width="100" height="100" as="geometry" />
+</mxCell>
+        <mxCell id="139915406807328" value="Serve order" style="whiteSpace=wrap;rounded=0;dashed=0;strokeWidth=2;shape=mxgraph.flowchart.terminator;" vertex="1" parent="1">
+  <mxGeometry x="70" y="750" width="100" height="60" as="geometry" />
+</mxCell>
+        <mxCell id="139915406807520" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=0;jettySize=auto;entryX=0.5;entryY=0.0;exitX=0.5;exitY=1.0;endArrow=classic;endFill=1;" edge="1" parent="1" source="139915417056640" target="139915406806752">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="139915406807664" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=0;jettySize=auto;entryX=0.5;entryY=0.0;exitX=0.5;exitY=1.0;endArrow=classic;endFill=1;" edge="1" parent="1" source="139915406806752" target="139915406806896">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="139915406807808" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=0;jettySize=auto;entryX=0.5;entryY=0.0;exitX=0.5;exitY=1.0;endArrow=classic;endFill=1;" edge="1" parent="1" source="139915406806896" target="139915406807040" value="Yes">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="139915406807952" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=0;jettySize=auto;entryX=0.0;entryY=0.3333333333333333;exitX=1.0;exitY=0.3333333333333333;endArrow=classic;endFill=1;" edge="1" parent="1" source="139915406806896" target="139915406807184" value="No">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="139915406808096" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=0;jettySize=auto;entryX=0.5;entryY=0.0;exitX=0.5;exitY=1.0;endArrow=classic;endFill=1;" edge="1" parent="1" source="139915406807040" target="139915406807328">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="139915406808240" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=0;jettySize=auto;entryX=1.0;entryY=0.6666666666666666;exitX=0.0;exitY=0.6666666666666666;endArrow=classic;endFill=1;" edge="1" parent="1" source="139915406807184" target="139915406806896">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
