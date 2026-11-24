@@ -1,7 +1,7 @@
 # Extended Objects
 While any of the objects in Draw.io can be created by setting the correct combination of attributes it's not always convenient, particularly when an 'object' is actually a small group of objects. To offer a little more convenience drawpyo has extended objects. These inherit from the Object class but extend it with added functionality, though not quite to the level of the custom diagram types.
 
-There's only one extended object implemented now but there could be more in the future, either mirroring Draw.io functionality or new object types.
+Extended objects can mirror Draw.io functionality or provide new object types while retaining the normal `Object` styling and positioning APIs.
 
 ## List
 
@@ -44,3 +44,76 @@ new_list.remove_item("item B")
 ### Resizing the List
 
 The list will be automatically resized to match the contents when the above methods are called. But the resize can also be called manually with the `.autosize()` method.
+
+## Table
+
+`diagram.Table` creates a native Draw.io table whose rows and cells remain individually editable in Draw.io. Tables can include an optional header row and require their column count to be established by headers, an initial data row, or explicit column widths.
+
+### Creating a Table
+
+```python
+table = drawpyo.diagram.Table(
+    page=page,
+    position=(100, 100),
+    headers=["Name", "Owner", "Status"],
+    rows=[
+        ["API", "Backend", "Active"],
+        ["Database", "Platform", "Planned"],
+    ],
+    column_widths=[160, 120, 100],
+    row_height=30,
+    header_height=35,
+)
+```
+
+When `column_widths` is omitted, each column is 120 pixels wide. The table width is the sum of its column widths, and its height is recalculated from the header and data rows.
+
+Tables without headers infer their column count from the first data row:
+
+```python
+table = drawpyo.diagram.Table(
+    page=page,
+    rows=[["API", "Backend", "Active"]],
+)
+```
+
+### Updating Rows and Cells
+
+Data-row and column indices are zero based. Header rows are not included in data-row indices.
+
+```python
+table.add_row(["Cache", "Backend", "Active"])
+table.set_cell(0, 2, "Completed")
+table.remove_row(1)
+```
+
+These operations update the live Draw.io objects already associated with the page. Adding or removing a row also resizes and repositions the table.
+
+The current values can be read through `table.headers` and `table.rows`. Both properties return lists of strings.
+
+### Styling and Resizing
+
+Basic table formatting can be supplied during construction or changed later:
+
+```python
+table.border_color = "#666666"
+table.background_color = "#FFFFFF"
+table.header_background_color = "#E6E6E6"
+table.column_widths = [180, 140, 100]
+table.row_height = 36
+table.header_height = 40
+
+table.header_text_format = drawpyo.diagram.TextFormat(
+    bold=True,
+    align="center",
+    verticalAlign="middle",
+)
+table.cell_text_format = drawpyo.diagram.TextFormat(
+    align="left",
+    verticalAlign="middle",
+)
+```
+
+Assigning a style or size property updates all existing applicable cells, and rows added later inherit the current settings.
+
+Tables are rectangular in this initial implementation. Merged cells, row or column spans, column insertion and removal, and automatic sizing based on text content are not supported.

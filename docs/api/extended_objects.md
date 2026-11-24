@@ -15,3 +15,11 @@
         show_root_heading: true
 
 -----
+
+## Table
+
+::: src.drawpyo.diagram.extended_objects.Table
+    options:
+        show_root_heading: true
+
+-----
