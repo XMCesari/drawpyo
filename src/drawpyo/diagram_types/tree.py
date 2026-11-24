@@ -191,6 +191,8 @@ class TreeDiagram:
             item_spacing (int, optional): Spacing in pixels between groups within a level. Defaults to 15.
             padding (int, optional): Spacing in pixels between objects within a group. Defaults to 10.
             group_factory (Callable, optional): Factory called with `tree=self` to create TreeGroups during layout. Defaults to TreeGroup.
+            file (File, optional): Existing File object to attach the diagram page to. Mutually exclusive with `file_name` and `file_path`.
+            page_name (str, optional): Name for the Page created for this TreeDiagram.
             file_name (str, optional): The name of the tree diagram.
             file_path (str, optional): The path where the tree diagram should be saved.
         """
@@ -208,10 +210,24 @@ class TreeDiagram:
             raise TypeError("group_factory must be callable.")
 
         # Set up the File and Page objects
-        self.file: File = File()
-        self.file_name: str = kwargs.get("file_name", "Heirarchical Diagram.drawio")
-        self.file_path: str = kwargs.get("file_path", r"C:/")
-        self.page: Page = Page(file=self.file)
+        existing_file = kwargs.get("file", None)
+        if existing_file is not None:
+            if "file_name" in kwargs or "file_path" in kwargs:
+                raise ValueError(
+                    "Cannot specify 'file' together with 'file_name' or 'file_path'."
+                )
+            if not isinstance(existing_file, File):
+                raise TypeError("file must be a File instance.")
+            self.file: File = existing_file
+        else:
+            self.file = File()
+            self.file_name: str = kwargs.get("file_name", "Heirarchical Diagram.drawio")
+            self.file_path: str = kwargs.get("file_path", r"C:/")
+
+        page_kwargs: Dict[str, Any] = {"file": self.file}
+        if kwargs.get("page_name") is not None:
+            page_kwargs["name"] = kwargs["page_name"]
+        self.page: Page = Page(**page_kwargs)
 
         # Set up object and level lists
         self.objects: List[NodeObject] = []
