@@ -380,3 +380,127 @@ class TestLocalFileIntegration:
         assert obj.width == 120
         assert obj.height == 60
         assert "fillColor=#dae8fc" in obj.baseStyle
+
+
+class TestMultiCellMxlibrary:
+    """Tests for multi-cell compound stencil icons (#126)"""
+
+    OCI_GRAPH_XML = (
+        "<mxGraphModel><root>"
+        '<mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="2" style="fillColor=none;strokeColor=none;" parent="1">'
+        '<mxGeometry x="10" width="84" height="73" as="geometry"/>'
+        "</mxCell>"
+        '<mxCell id="3" style="fillColor=#FFFFFF;shape=stencil(lVbb);" parent="2">'
+        '<mxGeometry width="82" height="71" as="geometry"/>'
+        "</mxCell>"
+        '<mxCell id="4" style="fillColor=#FFFFFF;shape=stencil(pVnJ);" parent="2">'
+        '<mxGeometry width="84" height="73" as="geometry"/>'
+        "</mxCell>"
+        '<mxCell id="5" style="fillColor=#2d5967;shape=stencil(nZRB);" parent="2">'
+        '<mxGeometry x="1" y="1" width="80" height="69" as="geometry"/>'
+        "</mxCell>"
+        '<mxCell id="6" style="verticalAlign=middle;shape=stencil(nZBL);" parent="1">'
+        '<mxGeometry y="77" width="104" height="40" as="geometry"/>'
+        "</mxCell>"
+        "</root></mxGraphModel>"
+    )
+
+    def test_parse_mxlibrary_rejects_structural_only_cells(self):
+        """Structural id='0'/id='1' cells alone must not produce a blank shape."""
+        empty_graph = '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/></root></mxGraphModel>'
+        import json as _json
+
+        content = _json.dumps(
+            [{"h": 50, "w": 50, "title": "Empty", "xml": empty_graph}]
+        )
+        shapes, errors = parse_mxlibrary(content)
+
+        assert shapes == {}
+        assert len(errors) == 1
+        assert "No valid mxCell found in XML" in errors[0]
+
+    def test_parse_mxlibrary_preserves_multicell_oci_stencil_icon(self):
+        """Multi-cell OCI stencil icons preserve all content cells, hierarchy, and geometry."""
+        import json as _json
+
+        content = _json.dumps(
+            [{"h": 117, "w": 104, "title": "OCI Compute", "xml": self.OCI_GRAPH_XML}]
+        )
+        shapes, errors = parse_mxlibrary(content)
+
+        assert errors == []
+        icon = shapes["OCI Compute"]
+        assert icon["width"] == 104
+        assert icon["height"] == 117
+        assert "shape=stencil(" in icon["baseStyle"]
+        assert len(icon["cells"]) == 5
+        assert [c["id"] for c in icon["cells"]] == ["2", "3", "4", "5", "6"]
+        assert icon["cells"][1]["parent"] == "2"
+        assert icon["cells"][3]["geometry"]["x"] == 1
+        assert icon["cells"][3]["geometry"]["y"] == 1
+        assert icon["cells"][4]["parent"] == "1"
+        assert icon["cells"][4]["geometry"]["y"] == 77
+
+    def test_parse_mxlibrary_decodes_compressed_multicell_icon(self):
+        """Compressed base64 + raw DEFLATE + URI-encoded multi-cell icons decode cleanly."""
+        import json as _json
+
+        compressed = zlib.compress(
+            urllib.parse.quote(self.OCI_GRAPH_XML).encode("utf-8")
+        )[2:-4]
+        encoded_xml = base64.b64encode(compressed).decode("ascii")
+        content = _json.dumps(
+            [{"h": 117, "w": 104, "title": "OCI Compressed", "xml": encoded_xml}]
+        )
+
+        shapes, errors = parse_mxlibrary(content)
+
+        assert errors == []
+        assert len(shapes["OCI Compressed"]["cells"]) == 5
+
+    def test_object_from_library_instantiates_independent_compound_copies(self):
+        """Inserting the same multi-cell icon twice creates fresh IDs and remapped parents."""
+        import json as _json
+        import xml.etree.ElementTree as ET
+
+        content = _json.dumps(
+            [{"h": 117, "w": 104, "title": "OCI Compute", "xml": self.OCI_GRAPH_XML}]
+        )
+        shapes, errors = parse_mxlibrary(content)
+        assert errors == []
+
+        file = drawpyo.File()
+        page = drawpyo.Page(file=file)
+
+        first = drawpyo.diagram.object_from_library(
+            library=shapes, obj_name="OCI Compute", page=page, position=(10, 20)
+        )
+        second = drawpyo.diagram.object_from_library(
+            library=shapes, obj_name="OCI Compute", page=page, position=(200, 20)
+        )
+
+        # Two top-level children ("2" and "6"), with "2" holding 3 nested stencil children
+        assert len(first.children) == 2
+        assert len(second.children) == 2
+        assert first.id != second.id
+
+        first_ids = {
+            obj.id for obj in [first, *first.children, *first.children[0].children]
+        }
+        second_ids = {
+            obj.id for obj in [second, *second.children, *second.children[0].children]
+        }
+        assert len(first_ids) == 6
+        assert len(second_ids) == 6
+        assert first_ids.isdisjoint(second_ids)
+
+        # Verify exported XML contains valid remapped parent attributes and stencil payloads
+        xml_str = file.xml
+        root = ET.fromstring(xml_str)
+        stencils = [
+            cell
+            for cell in root.iter("mxCell")
+            if "shape=stencil(" in (cell.get("style") or "")
+        ]
+        assert len(stencils) == 8  # 4 stencil cells per copy * 2 copies

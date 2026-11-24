@@ -118,7 +118,6 @@ class Object(DiagramBase):
             "whiteSpace",
             "rounded",
             "fillColor",
-            "gradientColor",
             "strokeColor",
             "glass",
             "shadow",
@@ -179,14 +178,6 @@ class Object(DiagramBase):
         self.fillColor: Optional[Union[str, StandardColor]] = kwargs.get(
             "fillColor"
         ) or (self.color_scheme.fill_color if self.color_scheme else None)
-        # Draw.io uses gradientColor as the end color; expose the shorter
-        # ``gradient`` kwarg while retaining the native style attribute.
-        gradient = kwargs.get("gradient", kwargs.get("gradientColor"))
-        self.gradientColor: Optional[Union[str, StandardColor]] = (
-            ColorScheme(gradient_color=gradient).gradient_color
-            if gradient is not None
-            else (self.color_scheme.gradient_color if self.color_scheme else None)
-        )
         self.glass: Optional[bool] = kwargs.get("glass", None)
         self.shadow: Optional[bool] = kwargs.get("shadow", None)
         self.comic: Optional[bool] = kwargs.get("comic", None)
@@ -328,7 +319,10 @@ class Object(DiagramBase):
                 library_dict: Dict[str, Any] = base_libraries[library]
                 if obj_name in library_dict:
                     obj_dict: Dict[str, Any] = library_dict[obj_name]
-                    self.apply_attribute_dict(obj_dict)
+                    if "cells" in obj_dict:
+                        self._apply_compound_library_object(obj_dict)
+                    else:
+                        self.apply_attribute_dict(obj_dict)
                 else:
                     raise ValueError(
                         f"Object '{obj_name}' not found in library '{library}'. "
@@ -362,11 +356,90 @@ class Object(DiagramBase):
                     f"This may result in a shape without styling."
                 )
 
-            self.apply_attribute_dict(obj_dict)
+            if "cells" in obj_dict:
+                self._apply_compound_library_object(obj_dict)
+            else:
+                self.apply_attribute_dict(obj_dict)
         else:
             raise ValueError(
                 f"Invalid library type: expected str or dict, got {type(library).__name__}"
             )
+
+    def _apply_compound_library_object(self, obj_dict: Dict[str, Any]) -> None:
+        """Instantiate a compound multi-cell library shape with fresh IDs."""
+        from .edges import Edge
+
+        cells: List[Dict[str, Any]] = obj_dict.get("cells") or []
+        scalar_attrs = {k: v for k, v in obj_dict.items() if k != "cells"}
+        self.apply_attribute_dict(scalar_attrs)
+
+        if not cells:
+            return
+
+        cell_ids = {cell.get("id") for cell in cells if cell.get("id") is not None}
+        top_level = [cell for cell in cells if cell.get("parent") not in cell_ids]
+
+        id_map: Dict[str, Any] = {}
+        if len(top_level) == 1 and top_level[0].get("edge") != "1":
+            root_cell = top_level[0]
+            root_geom = root_cell.get("geometry") or {}
+            root_style = root_cell.get("style", "")
+            self.baseStyle = root_style or "fillColor=none;strokeColor=none;"
+            if not self.value and root_cell.get("value"):
+                self.value = root_cell["value"]
+            if not obj_dict.get("width") and root_geom.get("width") is not None:
+                self.width = root_geom["width"]
+            if not obj_dict.get("height") and root_geom.get("height") is not None:
+                self.height = root_geom["height"]
+            if root_cell.get("id") is not None:
+                id_map[root_cell["id"]] = self
+            remaining = [cell for cell in cells if cell is not root_cell]
+        else:
+            self.baseStyle = "group"
+            remaining = list(cells)
+
+        vertex_cells = [cell for cell in remaining if cell.get("edge") != "1"]
+        edge_cells = [cell for cell in remaining if cell.get("edge") == "1"]
+
+        # Create vertex objects first so parent/source/target references can be remapped.
+        created_vertices: List[Tuple[Dict[str, Any], Object]] = []
+        for cell in vertex_cells:
+            geom = cell.get("geometry") or {}
+            child_kwargs: Dict[str, Any] = {
+                "value": cell.get("value", ""),
+                "baseStyle": cell.get("style", ""),
+                "page": self.page,
+            }
+            if geom.get("width") is not None:
+                child_kwargs["width"] = geom["width"]
+            if geom.get("height") is not None:
+                child_kwargs["height"] = geom["height"]
+            child = Object(**child_kwargs)
+            if cell.get("id") is not None:
+                id_map[cell["id"]] = child
+            created_vertices.append((cell, child))
+
+        for cell, child in created_vertices:
+            geom = cell.get("geometry") or {}
+            parent_ref = id_map.get(cell.get("parent"), self)
+            child.parent = parent_ref
+            child.position_rel_to_parent = (
+                geom.get("x") if geom.get("x") is not None else 0,
+                geom.get("y") if geom.get("y") is not None else 0,
+            )
+
+        for cell in edge_cells:
+            parent_ref = id_map.get(cell.get("parent"), self)
+            source_ref = id_map.get(cell.get("source"))
+            target_ref = id_map.get(cell.get("target"))
+            edge = Edge(
+                page=self.page,
+                source=source_ref,
+                target=target_ref,
+                value=cell.get("value", ""),
+                baseStyle=cell.get("style", ""),
+            )
+            edge.parent = parent_ref
 
     @property
     def attributes(self) -> Dict[str, Any]:
