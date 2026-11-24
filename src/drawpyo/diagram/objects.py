@@ -372,9 +372,7 @@ class Object(DiagramBase):
     def attributes(self) -> Dict[str, Any]:
         id_value = self.id
         value_value = self.value
-        if not (self.tag or self.tooltip) and (
-            self.object_attributes or self.user_object_attributes
-        ):
+        if self.object_attributes or self.user_object_attributes:
             id_value = None
             value_value = None
         return {
@@ -733,15 +731,15 @@ class Object(DiagramBase):
         tag: str = (
             self.xml_open_tag + "\n  " + self.geometry.xml + "\n" + self.xml_close_tag
         )
-        if self.tag or self.tooltip:
-            return tag
         wrapper_tag = None
         wrapper_attrs = None
         if self.user_object_attributes:
             wrapper_tag = "UserObject"
             wrapper_attrs = self.user_object_attributes
         elif self.object_attributes:
-            wrapper_tag = "object"
+            wrapper_tag = (
+                "UserObject" if (self.tag or self.tooltip or self.link) else "object"
+            )
             wrapper_attrs = self.object_attributes
         if wrapper_tag and wrapper_attrs is not None:
             return (
@@ -754,6 +752,16 @@ class Object(DiagramBase):
 
     def _wrapper_open_tag(self, tag: str, attrs: Dict[str, str]) -> str:
         attrs = {k: v for k, v in attrs.items() if v is not None}
+        if self.tag:
+            attrs["tags"] = self.tag
+        if self.tooltip:
+            attrs["tooltip"] = self.tooltip
+        if self.link:
+            attrs["link"] = self.link
+            if self.link_target:
+                attrs["linkTarget"] = self.link_target
+            else:
+                attrs.pop("linkTarget", None)
         if "label" not in attrs and self.value is not None:
             attrs["label"] = self.value
         if "id" not in attrs:

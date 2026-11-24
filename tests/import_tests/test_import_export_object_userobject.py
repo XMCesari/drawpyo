@@ -119,3 +119,39 @@ def test_parsed_diagram_add_to_offset(diagram):
     assert obj_2 is not None
     assert obj_1.position == (360, 390)
     assert obj_2.position == (160, 300)
+
+
+def test_user_object_label_link_and_link_target_round_trip(tmp_path):
+    file = File(file_name="links.drawio", file_path=str(tmp_path))
+    page = Page(file=file)
+
+    obj_ext = Object(page=page, value="Docs", link="https://example.com")
+    obj_page = Object(page=page, value="Next Page")
+    obj_page.add_link("data:page/id,page-2", link_target=None)
+    edge = Edge(
+        page=page,
+        source=obj_ext,
+        target=obj_page,
+        label="See also",
+        link="https://example.org",
+    )
+
+    out_path = tmp_path / "links.drawio"
+    out_path.write_text(file.xml, encoding="utf-8")
+
+    imported = load_diagram(str(out_path))
+    imported_ext = imported.get_by_id(str(obj_ext.id))
+    imported_page = imported.get_by_id(str(obj_page.id))
+    imported_edge = imported.get_by_id(str(edge.id))
+
+    assert imported_ext.value == "Docs"
+    assert imported_ext.link == "https://example.com"
+    assert imported_ext.link_target == "_blank"
+
+    assert imported_page.value == "Next Page"
+    assert imported_page.link == "data:page/id,page-2"
+    assert imported_page.link_target is None
+
+    assert imported_edge.label == "See also"
+    assert imported_edge.link == "https://example.org"
+    assert imported_edge.link_target == "_blank"

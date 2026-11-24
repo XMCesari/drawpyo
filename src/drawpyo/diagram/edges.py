@@ -614,7 +614,9 @@ class Edge(DiagramBase):
             wrapper_tag = "UserObject"
             wrapper_attrs = self.user_object_attributes
         elif self.object_attributes:
-            wrapper_tag = "object"
+            wrapper_tag = (
+                "UserObject" if (self.tag or self.tooltip or self.link) else "object"
+            )
             wrapper_attrs = self.object_attributes
         if wrapper_tag and wrapper_attrs is not None:
             return (
@@ -627,6 +629,16 @@ class Edge(DiagramBase):
 
     def _wrapper_open_tag(self, tag: str, attrs: Dict[str, str]) -> str:
         attrs = {k: v for k, v in attrs.items() if v is not None}
+        if self.tag:
+            attrs["tags"] = self.tag
+        if self.tooltip:
+            attrs["tooltip"] = self.tooltip
+        if self.link:
+            attrs["link"] = self.link
+            if self.link_target:
+                attrs["linkTarget"] = self.link_target
+            else:
+                attrs.pop("linkTarget", None)
         if "label" not in attrs and self.value is not None:
             attrs["label"] = self.value
         if "id" not in attrs:

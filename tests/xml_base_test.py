@@ -143,6 +143,44 @@ class TestXMLBaseTags:
         assert wrapper.get("link") == "data:page/id,page-2"
         assert wrapper.get("linkTarget") is None
 
+    def test_xml_base_serialization_with_link(self) -> None:
+        obj = drawpyo.XMLBase(id="base_1", link="https://example.com")
+        wrapper = ET.fromstring(obj.xml)
+        assert wrapper.tag == "UserObject"
+        assert wrapper.get("label") == ""
+        assert wrapper.get("id") == "base_1"
+        assert wrapper.get("link") == "https://example.com"
+        assert wrapper.get("linkTarget") == "_blank"
+        assert wrapper.find("xml_tag") is not None
+
+    @pytest.mark.parametrize(
+        "element_type", [drawpyo.diagram.Object, drawpyo.diagram.Edge]
+    )
+    def test_link_consolidates_with_existing_user_object_attributes(
+        self, element_type: type
+    ) -> None:
+        elem = element_type(
+            id="wrapped_1",
+            value="Node",
+            user_object_attributes={
+                "custom": "keep",
+                "link": "https://old.example",
+                "linkTarget": "_blank",
+            },
+        )
+        elem.add_link("https://new.example", link_target=None)
+
+        wrapper = ET.fromstring(elem.xml)
+        assert wrapper.tag == "UserObject"
+        assert wrapper.find("UserObject") is None
+        assert wrapper.get("custom") == "keep"
+        assert wrapper.get("link") == "https://new.example"
+        assert wrapper.get("linkTarget") is None
+        cell = wrapper.find("mxCell")
+        assert cell is not None
+        assert cell.get("id") is None
+        assert cell.get("value") is None
+
 
 class TestXmlIfy:
     """XML special character escaping tests"""
