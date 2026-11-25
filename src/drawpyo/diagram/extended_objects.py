@@ -130,3 +130,208 @@ class PieSlice(Object):
         self.geometry.width = float(value)
         self.geometry.height = float(value)
         self.update_parent()
+
+
+class Swimlane(Object):
+    """A Draw.io swimlane container object with a header bar."""
+
+    def __init__(
+        self,
+        title: str = "Swimlane",
+        orientation: str = "vertical",
+        start_size: Union[int, float] = 23,
+        **kwargs: Any,
+    ) -> None:
+        if orientation not in ("vertical", "horizontal"):
+            raise ValueError(
+                f"orientation must be 'vertical' or 'horizontal', got {orientation!r}"
+            )
+        collapsible = kwargs.pop("collapsible", 0)
+        kwargs.setdefault("width", 200)
+        kwargs.setdefault("height", 200)
+        super().__init__(value=title, **kwargs)
+        self.baseStyle = "swimlane"
+        for attr in ("startSize", "horizontal", "collapsible"):
+            if attr not in self._style_attributes:
+                self._style_attributes.append(attr)
+        self.orientation: str = orientation
+        self.startSize: Union[int, float] = start_size
+        # In Draw.io, horizontal=1 means a horizontal (top) header (vertical lane);
+        # horizontal=0 means a vertical (left) header (horizontal lane).
+        self.horizontal: int = 1 if orientation == "vertical" else 0
+        self.collapsible: int = collapsible
+
+    def add_item(
+        self,
+        obj: Object,
+        position_rel_to_parent: Optional[tuple] = None,
+    ) -> Object:
+        """Add an Object inside this swimlane."""
+        if self.page is not None and obj.page is None:
+            obj.page = self.page
+        obj.parent = self
+        if position_rel_to_parent is not None:
+            obj.position_rel_to_parent = position_rel_to_parent
+        return obj
+
+    def remove_item(self, obj: Object) -> None:
+        """Remove an Object from this swimlane."""
+        if obj in self.children:
+            self.remove_object(obj)
+
+
+class Pool(Object):
+    """A Draw.io swimlane pool that stacks Swimlane children horizontally or vertically."""
+
+    def __init__(
+        self,
+        title: str = "Pool",
+        lanes: Optional[ListType[Union[str, Swimlane]]] = None,
+        orientation: str = "horizontal",
+        start_size: Union[int, float] = 30,
+        lane_size: Union[int, float] = 120,
+        lane_length: Union[int, float] = 400,
+        autosizing: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        if orientation not in ("horizontal", "vertical"):
+            raise ValueError(
+                f"orientation must be 'horizontal' or 'vertical', got {orientation!r}"
+            )
+        self.orientation: str = orientation
+        self.lane_size: Union[int, float] = lane_size
+        self.lane_length: Union[int, float] = lane_length
+        self.autosizing: bool = autosizing
+
+        collapsible = kwargs.pop("collapsible", 1)
+        if orientation == "horizontal":
+            kwargs.setdefault("width", start_size + lane_length)
+            kwargs.setdefault("height", lane_size)
+        else:
+            kwargs.setdefault("width", lane_size)
+            kwargs.setdefault("height", start_size + lane_length)
+
+        super().__init__(value=title, **kwargs)
+        self.baseStyle = "swimlane"
+        for attr in (
+            "childLayout",
+            "startSize",
+            "horizontal",
+            "horizontalStack",
+            "resizeParent",
+            "resizeParentMax",
+            "resizeLast",
+            "collapsible",
+            "marginBottom",
+        ):
+            if attr not in self._style_attributes:
+                self._style_attributes.append(attr)
+
+        self.childLayout: str = "stackLayout"
+        self.startSize: Union[int, float] = start_size
+        self.horizontal: int = 0 if orientation == "horizontal" else 1
+        self.horizontalStack: int = 0 if orientation == "horizontal" else 1
+        self.resizeParent: int = 1
+        self.resizeParentMax: int = 0
+        self.resizeLast: int = 0
+        self.collapsible: int = collapsible
+        self.marginBottom: int = 0
+
+        if lanes:
+            for lane in lanes:
+                self.add_lane(lane)
+
+    @property
+    def lanes(self) -> ListType[Swimlane]:
+        """Return all Swimlane children belonging to this pool."""
+        return [child for child in self.children if isinstance(child, Swimlane)]
+
+    def add_lane(
+        self,
+        lane: Union[str, Swimlane],
+        size: Optional[Union[int, float]] = None,
+    ) -> Swimlane:
+        """Add a lane by title or Swimlane instance and restack lanes."""
+        lane_dim = size if size is not None else self.lane_size
+        if isinstance(lane, str):
+            lane_obj = Swimlane(
+                title=lane,
+                orientation=self.orientation,
+                page=self.page,
+                width=(
+                    self.lane_length if self.orientation == "horizontal" else lane_dim
+                ),
+                height=(
+                    lane_dim if self.orientation == "horizontal" else self.lane_length
+                ),
+            )
+        elif isinstance(lane, Swimlane):
+            lane_obj = lane
+            lane_obj.orientation = self.orientation
+            lane_obj.horizontal = 0 if self.orientation == "horizontal" else 1
+            if self.page is not None and lane_obj.page is None:
+                lane_obj.page = self.page
+            if size is not None:
+                if self.orientation == "horizontal":
+                    lane_obj.height = lane_dim
+                else:
+                    lane_obj.width = lane_dim
+        else:
+            raise TypeError("lane must be a string title or a Swimlane instance.")
+
+        lane_obj.parent = self
+        self.layout_lanes()
+        return lane_obj
+
+    def remove_lane(self, lane: Union[str, Swimlane]) -> None:
+        """Remove a lane by Swimlane instance or matching title and restack."""
+        targets = (
+            [child for child in self.lanes if child.value == lane]
+            if isinstance(lane, str)
+            else [lane] if lane in self.lanes else []
+        )
+        for target in targets:
+            for child in list(target.children):
+                target.remove_object(child)
+                if self.page is not None and child in self.page.objects:
+                    self.page.remove_object(child)
+            self.remove_object(target)
+            if self.page is not None and target in self.page.objects:
+                self.page.remove_object(target)
+        self.layout_lanes()
+
+    def layout_lanes(self) -> None:
+        """Stack lanes sequentially inside the pool and optionally resize the pool."""
+        lanes = self.lanes
+        if not lanes:
+            if self.autosizing:
+                if self.orientation == "horizontal":
+                    self.width = self.startSize + self.lane_length
+                    self.height = self.lane_size
+                else:
+                    self.width = self.lane_size
+                    self.height = self.startSize + self.lane_length
+            return
+
+        if self.orientation == "horizontal":
+            y_offset: Union[int, float] = 0
+            max_width = max(lane.width for lane in lanes)
+            for lane in lanes:
+                lane.width = max_width
+                lane.geometry.x = self.startSize
+                lane.geometry.y = y_offset
+                y_offset += lane.height
+            if self.autosizing:
+                self.width = self.startSize + max_width
+                self.height = y_offset
+        else:
+            x_offset: Union[int, float] = 0
+            max_height = max(lane.height for lane in lanes)
+            for lane in lanes:
+                lane.height = max_height
+                lane.geometry.x = x_offset
+                lane.geometry.y = self.startSize
+                x_offset += lane.width
+            if self.autosizing:
+                self.width = x_offset
+                self.height = self.startSize + max_height

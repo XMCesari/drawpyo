@@ -9,7 +9,7 @@ from .base_diagram import (
 from .text_format import TextFormat
 from .edges import Edge, BasicEdge, EdgeGeometry, EdgeLabel, Point
 from .objects import Object, BasicObject, Group, object_from_library
-from .extended_objects import List, PieSlice
+from .extended_objects import List, PieSlice, Pool, Swimlane
 
 __all__ = [
     DiagramBase,
@@ -30,4 +30,6 @@ __all__ = [
     object_from_library,
     List,
     PieSlice,
+    Pool,
+    Swimlane,
 ]
