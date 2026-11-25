@@ -109,3 +109,38 @@ def test_invalid_orientation_and_lane_type_raise():
     pool = Pool()
     with pytest.raises(TypeError, match="lane must be a string title or a Swimlane"):
         pool.add_lane(123)  # type: ignore[arg-type]
+
+
+def test_pool_add_existing_swimlane_aligns_orientation_and_remove_cleans_children():
+    file = drawpyo.File()
+    page = drawpyo.Page(file=file)
+
+    pool = Pool(
+        title="Process",
+        orientation="horizontal",
+        start_size=30,
+        lane_size=100,
+        lane_length=400,
+        collapsible=0,
+        page=page,
+    )
+    assert "collapsible=0" in pool.style
+
+    # Default Swimlane has orientation="vertical"; adding to a horizontal Pool aligns it
+    lane = Swimlane(title="Existing", collapsible=1, page=page)
+    assert "collapsible=1" in lane.style
+    pool.add_lane(lane, size=120)
+    assert lane.orientation == "horizontal"
+    assert lane.horizontal == 0
+    assert "horizontal=0" in lane.style
+
+    task = Object(value="Step 1", page=page)
+    lane.add_item(task)
+    assert task in page.objects
+
+    pool.remove_lane(lane)
+    assert pool.lanes == []
+    assert task not in page.objects
+    assert task.parent is None
+    assert pool.width == 430
+    assert pool.height == 100

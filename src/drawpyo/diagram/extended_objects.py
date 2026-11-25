@@ -146,6 +146,7 @@ class Swimlane(Object):
             raise ValueError(
                 f"orientation must be 'vertical' or 'horizontal', got {orientation!r}"
             )
+        collapsible = kwargs.pop("collapsible", 0)
         kwargs.setdefault("width", 200)
         kwargs.setdefault("height", 200)
         super().__init__(value=title, **kwargs)
@@ -158,7 +159,7 @@ class Swimlane(Object):
         # In Draw.io, horizontal=1 means a horizontal (top) header (vertical lane);
         # horizontal=0 means a vertical (left) header (horizontal lane).
         self.horizontal: int = 1 if orientation == "vertical" else 0
-        self.collapsible: int = kwargs.get("collapsible", 0)
+        self.collapsible: int = collapsible
 
     def add_item(
         self,
@@ -202,6 +203,7 @@ class Pool(Object):
         self.lane_length: Union[int, float] = lane_length
         self.autosizing: bool = autosizing
 
+        collapsible = kwargs.pop("collapsible", 1)
         if orientation == "horizontal":
             kwargs.setdefault("width", start_size + lane_length)
             kwargs.setdefault("height", lane_size)
@@ -232,7 +234,7 @@ class Pool(Object):
         self.resizeParent: int = 1
         self.resizeParentMax: int = 0
         self.resizeLast: int = 0
-        self.collapsible: int = kwargs.get("collapsible", 1)
+        self.collapsible: int = collapsible
         self.marginBottom: int = 0
 
         if lanes:
@@ -265,6 +267,8 @@ class Pool(Object):
             )
         elif isinstance(lane, Swimlane):
             lane_obj = lane
+            lane_obj.orientation = self.orientation
+            lane_obj.horizontal = 0 if self.orientation == "horizontal" else 1
             if self.page is not None and lane_obj.page is None:
                 lane_obj.page = self.page
             if size is not None:
@@ -287,6 +291,10 @@ class Pool(Object):
             else [lane] if lane in self.lanes else []
         )
         for target in targets:
+            for child in list(target.children):
+                target.remove_object(child)
+                if self.page is not None and child in self.page.objects:
+                    self.page.remove_object(child)
             self.remove_object(target)
             if self.page is not None and target in self.page.objects:
                 self.page.remove_object(target)
@@ -296,6 +304,13 @@ class Pool(Object):
         """Stack lanes sequentially inside the pool and optionally resize the pool."""
         lanes = self.lanes
         if not lanes:
+            if self.autosizing:
+                if self.orientation == "horizontal":
+                    self.width = self.startSize + self.lane_length
+                    self.height = self.lane_size
+                else:
+                    self.width = self.lane_size
+                    self.height = self.startSize + self.lane_length
             return
 
         if self.orientation == "horizontal":
