@@ -36,6 +36,10 @@ class XMLBase:
 
         self.tag: Optional[str] = kwargs.get("tag", None)
         self.tooltip: Optional[str] = kwargs.get("tooltip", None)
+        self.link: Optional[str] = kwargs.get("link", None)
+        self.link_target: Optional[str] = kwargs.get(
+            "link_target", "_blank" if self.link else None
+        )
 
     @property
     def id(self) -> Union[int, str]:
@@ -46,6 +50,19 @@ class XMLBase:
             int: A unique identifier for the Draw.io object
         """
         return self._id
+
+    def add_link(self, link: str, link_target: Optional[str] = "_blank") -> None:
+        """
+        Add a link (external URL or internal draw.io page link such as
+        ``data:page/id,<page_id>``) to this element.
+
+        Args:
+            link (str): The target URL or draw.io page link.
+            link_target (Optional[str]): The HTML link target attribute (e.g. ``"_blank"``).
+                Defaults to ``"_blank"``. Pass ``None`` to omit ``linkTarget``.
+        """
+        self.link = link
+        self.link_target = link_target
 
     @property
     def attributes(self) -> Dict[str, Any]:
@@ -60,6 +77,20 @@ class XMLBase:
     ###########################################################
     # XML Tags
     ###########################################################
+
+    @property
+    def _has_wrapper_attributes(self) -> bool:
+        return bool(
+            getattr(self, "user_object_attributes", None)
+            or getattr(self, "object_attributes", None)
+        )
+
+    @property
+    def _uses_user_object_wrapper(self) -> bool:
+        return (
+            bool(self.tag or self.tooltip or self.link)
+            and not self._has_wrapper_attributes
+        )
 
     @property
     def xml_open_tag(self) -> str:
@@ -77,8 +108,9 @@ class XMLBase:
         Returns:
             str: The opening tag of the object with all the attributes.
         """
-        if self.tag or self.tooltip:
-            label = "" if self.value is None else str(self.value)
+        if self._uses_user_object_wrapper:
+            value = getattr(self, "value", None)
+            label = "" if value is None else str(value)
             label = self.xml_ify(label)
             object_id = self.xml_ify(str(self.id))
             open_user_object_tag = f'<UserObject label="{label}" id="{object_id}"'
@@ -86,6 +118,12 @@ class XMLBase:
                 open_user_object_tag += f' tags="{self.xml_ify(str(self.tag))}"'
             if self.tooltip:
                 open_user_object_tag += f' tooltip="{self.xml_ify(self.tooltip)}"'
+            if self.link:
+                open_user_object_tag += f' link="{self.xml_ify(self.link)}"'
+                if self.link_target:
+                    open_user_object_tag += (
+                        f' linkTarget="{self.xml_ify(self.link_target)}"'
+                    )
             open_user_object_tag += ">"
 
             open_tag = "<" + self.xml_class
@@ -114,7 +152,7 @@ class XMLBase:
         Returns:
             str: The closing tag of the object with all the attributes.
         """
-        if self.tag or self.tooltip:
+        if self._uses_user_object_wrapper:
             return "</{0}>\n</UserObject>".format(self.xml_class)
         return "</{0}>".format(self.xml_class)
 
@@ -131,6 +169,8 @@ class XMLBase:
         Returns:
             str: A single XML tag containing the object name, style attributes, and a closer.
         """
+        if self._uses_user_object_wrapper:
+            return self.xml_open_tag[:-1] + " />\n</UserObject>"
         return self.xml_open_tag[:-1] + " />"
 
     def xml_ify(self, parameter_string: str) -> str:

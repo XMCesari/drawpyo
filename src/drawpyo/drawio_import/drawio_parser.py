@@ -146,11 +146,13 @@ def _update_page_links(element: DiagramBase, page: Page) -> None:
         page: The target Page instance.
     """
     user_attrs = getattr(element, "user_object_attributes", None)
-    if not user_attrs:
-        return
-    link = user_attrs.get("link")
-    if link and link.startswith("data:page/id,"):
-        user_attrs["link"] = f"data:page/id,{page.diagram.id}"
+    if user_attrs:
+        link = user_attrs.get("link")
+        if link and link.startswith("data:page/id,"):
+            user_attrs["link"] = f"data:page/id,{page.diagram.id}"
+    elem_link = getattr(element, "link", None)
+    if elem_link and elem_link.startswith("data:page/id,"):
+        element.link = f"data:page/id,{page.diagram.id}"
 
 
 def _parse_drawio_xml(xml_string: str) -> Dict[str, RawMxCell]:
@@ -282,9 +284,17 @@ def _build_vertices(raw_cells: Dict[str, RawMxCell]) -> Dict[str, DiagramBase]:
         if not cell.is_vertex:
             continue
 
+        wrapper_attrs = cell.user_object_attributes or cell.object_attributes or {}
+        value = cell.value if cell.value is not None else wrapper_attrs.get("label", "")
+        link = wrapper_attrs.get("link")
+        link_target = wrapper_attrs.get("linkTarget") if link is not None else None
         obj = Object(
             id=cell.id,
-            value=cell.value or "",
+            value=value,
+            tag=wrapper_attrs.get("tags"),
+            tooltip=wrapper_attrs.get("tooltip"),
+            link=link,
+            link_target=link_target,
             object_attributes=cell.object_attributes,
             user_object_attributes=cell.user_object_attributes,
         )
@@ -349,8 +359,15 @@ def _build_edges(raw_cells: Dict[str, RawMxCell], elements: Dict[str, DiagramBas
         if not cell.is_edge:
             continue
 
+        wrapper_attrs = cell.user_object_attributes or cell.object_attributes or {}
+        link = wrapper_attrs.get("link")
+        link_target = wrapper_attrs.get("linkTarget") if link is not None else None
         e = Edge(
             id=cell.id,
+            tag=wrapper_attrs.get("tags"),
+            tooltip=wrapper_attrs.get("tooltip"),
+            link=link,
+            link_target=link_target,
             object_attributes=cell.object_attributes,
             user_object_attributes=cell.user_object_attributes,
         )
@@ -367,7 +384,7 @@ def _build_edges(raw_cells: Dict[str, RawMxCell], elements: Dict[str, DiagramBas
             for x, y in cell.geometry.points:
                 e.add_point(int(x), int(y))
 
-        e.label = cell.value
+        e.label = cell.value if cell.value is not None else wrapper_attrs.get("label")
         elements[cell.id] = e
 
 
