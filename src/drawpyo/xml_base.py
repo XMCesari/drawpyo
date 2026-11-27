@@ -36,6 +36,7 @@ class XMLBase:
 
         self.tag: Optional[str] = kwargs.get("tag", None)
         self.tooltip: Optional[str] = kwargs.get("tooltip", None)
+        self.link: Optional[Any] = kwargs.get("link", None)
 
     @property
     def id(self) -> Union[int, str]:
@@ -62,6 +63,18 @@ class XMLBase:
     ###########################################################
 
     @property
+    def _resolved_link(self) -> Optional[str]:
+        """Resolve self.link to a Draw.io link attribute string (URL or data:page/id,<id>)."""
+        if not self.link:
+            return None
+        if isinstance(self.link, str):
+            return self.link
+        page_id = getattr(self.link, "id", None)
+        if page_id is not None:
+            return f"data:page/id,{page_id}"
+        return str(self.link)
+
+    @property
     def xml_open_tag(self) -> str:
         """
         The open tag contains the name of the object but also the attribute tags. This property function concatenates all the attributes in the class along with the opening and closing angle brackets and returns them as a string.
@@ -77,7 +90,8 @@ class XMLBase:
         Returns:
             str: The opening tag of the object with all the attributes.
         """
-        if self.tag or self.tooltip:
+        link_href = self._resolved_link
+        if self.tag or self.tooltip or link_href:
             label = "" if self.value is None else str(self.value)
             label = self.xml_ify(label)
             object_id = self.xml_ify(str(self.id))
@@ -86,6 +100,8 @@ class XMLBase:
                 open_user_object_tag += f' tags="{self.xml_ify(str(self.tag))}"'
             if self.tooltip:
                 open_user_object_tag += f' tooltip="{self.xml_ify(self.tooltip)}"'
+            if link_href:
+                open_user_object_tag += f' link="{self.xml_ify(link_href)}"'
             open_user_object_tag += ">"
 
             open_tag = "<" + self.xml_class
@@ -114,7 +130,7 @@ class XMLBase:
         Returns:
             str: The closing tag of the object with all the attributes.
         """
-        if self.tag or self.tooltip:
+        if self.tag or self.tooltip or self._resolved_link:
             return "</{0}>\n</UserObject>".format(self.xml_class)
         return "</{0}>".format(self.xml_class)
 
