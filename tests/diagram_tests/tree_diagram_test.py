@@ -1,3 +1,4 @@
+import drawpyo
 import pytest
 
 from drawpyo.diagram_types.tree import NodeObject, TreeDiagram, TreeGroup
@@ -90,7 +91,7 @@ def test_tree_diagram_page_name_without_existing_file():
 def test_tree_diagram_rejects_file_with_file_name_or_path(extra_kwargs):
     from drawpyo import File
 
-    shared_file = File()
+    shared_file = drawpyo.File()
     with pytest.raises(ValueError, match="Cannot specify 'file' together with"):
         TreeDiagram(file=shared_file, **extra_kwargs)
 
@@ -98,3 +99,30 @@ def test_tree_diagram_rejects_file_with_file_name_or_path(extra_kwargs):
 def test_tree_diagram_rejects_non_file_instance():
     with pytest.raises(TypeError, match="file must be a File instance"):
         TreeDiagram(file="not_a_file")
+
+
+def test_tree_diagram_from_dict_failed_call_preserves_shared_file():
+    shared_file = drawpyo.File()
+    existing_page = drawpyo.Page(file=shared_file, name="Existing")
+
+    with pytest.raises(ValueError, match="Invalid coloring mode"):
+        TreeDiagram.from_dict(
+            {"Root": "Child"},
+            file=shared_file,
+            coloring="invalid",
+        )
+
+    assert shared_file.pages == [existing_page]
+
+
+def test_tree_diagram_from_dict_build_error_preserves_shared_file():
+    shared_file = drawpyo.File()
+
+    with pytest.raises(TypeError, match="Unsupported color type"):
+        TreeDiagram.from_dict(
+            {"Root": "Child"},
+            file=shared_file,
+            colors=[12345],
+        )
+
+    assert shared_file.pages == []
