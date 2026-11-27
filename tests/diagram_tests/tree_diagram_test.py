@@ -1,3 +1,4 @@
+import drawpyo
 import pytest
 
 from drawpyo.diagram_types.tree import NodeObject, TreeDiagram, TreeGroup
@@ -52,3 +53,76 @@ def test_auto_layout_uses_factory_for_every_group():
 def test_tree_diagram_rejects_non_callable_group_factory():
     with pytest.raises(TypeError, match="group_factory must be callable"):
         TreeDiagram(group_factory=None)
+
+
+def test_tree_diagram_accepts_existing_file_and_page_name():
+    from drawpyo import File
+
+    shared_file = File(file_path="/tmp", file_name="multi.drawio")
+    tree_a = TreeDiagram(file=shared_file, page_name="Overview")
+    tree_b = TreeDiagram(file=shared_file, page_name="Details")
+
+    assert tree_a.file is shared_file
+    assert tree_b.file is shared_file
+    assert tree_a.file_name == "multi.drawio"
+    assert tree_a.file_path == "/tmp"
+    assert len(shared_file.pages) == 2
+    assert [p.name for p in shared_file.pages] == ["Overview", "Details"]
+    assert tree_a.page.name == "Overview"
+    assert tree_b.page.name == "Details"
+
+
+def test_tree_diagram_page_name_without_existing_file():
+    tree = TreeDiagram(file_name="single.drawio", page_name="Main Tree")
+
+    assert tree.file_name == "single.drawio"
+    assert tree.page.name == "Main Tree"
+    assert len(tree.file.pages) == 1
+
+
+@pytest.mark.parametrize(
+    "extra_kwargs",
+    [
+        {"file_name": "other.drawio"},
+        {"file_path": "/tmp"},
+        {"file_name": "other.drawio", "file_path": "/tmp"},
+    ],
+)
+def test_tree_diagram_rejects_file_with_file_name_or_path(extra_kwargs):
+    from drawpyo import File
+
+    shared_file = drawpyo.File()
+    with pytest.raises(ValueError, match="Cannot specify 'file' together with"):
+        TreeDiagram(file=shared_file, **extra_kwargs)
+
+
+def test_tree_diagram_rejects_non_file_instance():
+    with pytest.raises(TypeError, match="file must be a File instance"):
+        TreeDiagram(file="not_a_file")
+
+
+def test_tree_diagram_from_dict_failed_call_preserves_shared_file():
+    shared_file = drawpyo.File()
+    existing_page = drawpyo.Page(file=shared_file, name="Existing")
+
+    with pytest.raises(ValueError, match="Invalid coloring mode"):
+        TreeDiagram.from_dict(
+            {"Root": "Child"},
+            file=shared_file,
+            coloring="invalid",
+        )
+
+    assert shared_file.pages == [existing_page]
+
+
+def test_tree_diagram_from_dict_build_error_preserves_shared_file():
+    shared_file = drawpyo.File()
+
+    with pytest.raises(TypeError, match="Unsupported color type"):
+        TreeDiagram.from_dict(
+            {"Root": "Child"},
+            file=shared_file,
+            colors=[12345],
+        )
+
+    assert shared_file.pages == []
