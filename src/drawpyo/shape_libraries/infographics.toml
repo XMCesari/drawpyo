@@ -16,3 +16,116 @@ endAngle = 0.5
 shape = "mxgraph.basic.arc"
 verticalLabelPosition = "bottom"
 aspect = "fixed"
+
+[part_conc_ellipse]
+width = 100
+height = 100
+startAngle = 0.25
+endAngle = 0.1
+arcWidth = 0.5
+shape = "mxgraph.basic.partConcEllipse"
+verticalLabelPosition = "bottom"
+verticalAlign = "top"
+aspect = "fixed"
+
+[parallelogram]
+width = 100
+height = 70
+dx = 15
+shape = "mxgraph.infographic.parallelogram"
+verticalLabelPosition = "bottom"
+verticalAlign = "top"
+
+[ribbon_simple]
+width = 200
+height = 40
+notch1 = 20
+notch2 = 20
+shape = "mxgraph.infographic.ribbonSimple"
+align = "center"
+verticalAlign = "middle"
+
+[ribbon_rolled]
+width = 200
+height = 70
+dx = 185
+dy = 15
+shape = "mxgraph.infographic.ribbonRolled"
+align = "center"
+verticalAlign = "middle"
+
+[ribbon_double_folded]
+width = 200
+height = 70
+dx = 25
+dy = 15
+shape = "mxgraph.infographic.ribbonDoubleFolded"
+align = "center"
+verticalAlign = "middle"
+
+[ribbon_front_folded]
+width = 200
+height = 55
+dx = 25
+dy = 15
+notch = 15
+shape = "mxgraph.infographic.ribbonFrontFolded"
+align = "center"
+verticalAlign = "middle"
+spacingTop = 10
+
+[banner]
+width = 260
+height = 70
+dx = 32
+dy = 17
+notch = 15
+shape = "mxgraph.infographic.banner"
+align = "center"
+verticalAlign = "middle"
+spacingBottom = 15
+
+[banner_single_fold]
+width = 260
+height = 70
+dx = 32
+dx2 = 20
+dy = 17
+notch = 15
+shape = "mxgraph.infographic.bannerSingleFold"
+align = "left"
+verticalAlign = "middle"
+spacingBottom = 15
+spacingLeft = 25
+
+[banner_half_fold]
+width = 200
+height = 200
+dx = 40
+dx2 = 20
+notch = 15
+shape = "mxgraph.infographic.bannerHalfFold"
+align = "left"
+verticalAlign = "top"
+spacingLeft = 25
+spacingTop = 5
+
+[bar_callout]
+width = 200
+height = 70
+dx = 100
+dy = 30
+shape = "mxgraph.infographic.barCallout"
+align = "center"
+verticalAlign = "top"
+spacingTop = 5
+
+[flag]
+width = 200
+height = 70
+dx = 30
+dy = 20
+shape = "mxgraph.infographic.flag"
+align = "center"
+verticalAlign = "top"
+spacingTop = 5

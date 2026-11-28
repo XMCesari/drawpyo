@@ -127,6 +127,7 @@ class Object(DiagramBase):
             "opacity",
             "dashed",
             "dashPattern",
+            "aspect",
         ]
 
         self.geometry: Geometry = Geometry(parent_object=self)
